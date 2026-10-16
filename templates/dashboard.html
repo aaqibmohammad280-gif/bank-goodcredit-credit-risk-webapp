@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block title %}Portfolio Overview · Bank GoodCredit{% endblock %}
+{% block heading %}Portfolio overview{% endblock %}
+{% block content %}
+<section class="intro-row">
+  <div>
+    <h2>Champion validation at a glance</h2>
+    <p>Held-out test performance from the validated Bank GoodCredit scorecard.</p>
+  </div>
+  <a class="primary-button" href="{{ url_for('score') }}">Score a portfolio <span>→</span></a>
+</section>
+
+<section class="metric-grid" aria-label="Model performance metrics">
+  <article class="metric-card"><span class="metric-label">ROC–AUC</span><strong>{{ '%.4f'|format(metrics.roc_auc) }}</strong><p>Strong separation of good and bad-credit customers.</p></article>
+  <article class="metric-card highlight"><span class="metric-label">Gini points</span><strong>{{ '%.2f'|format(metrics.gini_points) }}</strong><p>{{ '%.2f'|format(metrics.gini_points - metrics.benchmark) }} points above the benchmark.</p></article>
+  <article class="metric-card"><span class="metric-label">Top 10% capture</span><strong>{{ '%.2f'|format(metrics.top_decile_capture) }}%</strong><p>Of bad-credit customers captured in the highest-risk decile.</p></article>
+  <article class="metric-card"><span class="metric-label">Top 20% capture</span><strong>{{ '%.2f'|format(metrics.top_two_decile_capture) }}%</strong><p>Of bad-credit customers captured in the two highest deciles.</p></article>
+</section>
+
+<section class="dashboard-grid">
+  <article class="panel chart-panel">
+    <div class="panel-header"><div><span class="eyebrow">RISK CONCENTRATION</span><h2>Observed bad rate by risk decile</h2></div><span class="legend"><i></i> Bad rate</span></div>
+    <div class="bar-chart" aria-label="Bad rate by risk decile, highest risk first">
+      {% for item in deciles %}
+      <div class="bar-row">
+        <span class="bar-label">{{ item.decile }}</span>
+        <div class="bar-track"><div class="bar-fill" style="width: {{ item.bad_rate / 10.04 * 100 }}%"></div></div>
+        <strong>{{ '%.2f'|format(item.bad_rate) }}%</strong>
+      </div>
+      {% endfor %}
+    </div>
+    <p class="chart-caption">Risk decile 10 is the highest-risk segment. Overall portfolio bad rate: 4.20%.</p>
+  </article>
+
+  <article class="panel action-panel">
+    <span class="eyebrow">BUSINESS ACTIONS</span><h2>Where to focus</h2>
+    <ol class="action-list">
+      <li><b>Highest 10%</b><span>Prioritise for manual review and additional verification.</span></li>
+      <li><b>Next 10%</b><span>Apply enhanced review and consider tighter initial terms.</span></li>
+      <li><b>All segments</b><span>Monitor drift, fairness, approval outcomes, and bad-rate movement monthly.</span></li>
+    </ol>
+    <div class="governance-callout"><strong>Governance check</strong><p>Validate on an out-of-time sample before production deployment or policy automation.</p></div>
+  </article>
+</section>
+
+<section class="panel driver-panel">
+  <div><span class="eyebrow">MODEL EXPLAINABILITY</span><h2>Leading risk drivers</h2></div>
+  <div class="driver-tags"><span>Recent enquiries</span><span>Historical DPD behaviour</span><span>Credit exposure</span><span>Account maturity</span><span>Derived age</span><span>Anonymised variables*</span></div>
+  <p>*Anonymised variables need a data dictionary and governance review before business interpretation.</p>
+</section>
+{% endblock %}

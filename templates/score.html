@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}Score a Portfolio · Bank GoodCredit{% endblock %}
+{% block heading %}Score a portfolio{% endblock %}
+{% block content %}
+<section class="score-layout">
+  <article class="panel upload-panel">
+    <span class="eyebrow">BATCH SCORING</span>
+    <h2>Upload model-ready customer data</h2>
+    <p>Upload a CSV that contains the exact feature columns used by the champion model. Extra columns, such as <code>customer_no</code>, are retained as a customer reference in the results.</p>
+    {% if status == 'Ready' %}
+      <a class="template-link" href="{{ url_for('download_template') }}">↓ Download the exact input template</a>
+    {% else %}
+      <div class="notice"><strong>Model artifact needed</strong><p>Copy <code>bank_goodcredit_champion_model.joblib</code> into <code>model_artifacts/</code>, then restart the app.</p></div>
+    {% endif %}
+
+    <form method="post" enctype="multipart/form-data" class="upload-form">
+      <label class="file-picker" for="portfolio">
+        <input id="portfolio" name="portfolio" type="file" accept=".csv,text/csv" required>
+        <span class="file-icon">↑</span>
+        <strong>Choose a CSV file</strong>
+        <small>CSV only · up to 15 MB</small>
+      </label>
+      <button class="primary-button" type="submit" {% if status != 'Ready' %}disabled{% endif %}>Run risk scoring <span>→</span></button>
+    </form>
+  </article>
+
+  <aside class="score-aside">
+    <article class="panel compact-panel"><span class="eyebrow">DATA CONTRACT</span><h2>Before you upload</h2><ul><li>Use engineered, model-ready features—not the three raw source files.</li><li>Keep all template headers unchanged.</li><li>Blank values are accepted and handled by the fitted preprocessing pipeline.</li></ul></article>
+    <article class="panel compact-panel warning"><span class="eyebrow">DECISION SAFETY</span><h2>Risk scores guide review</h2><p>The app ranks customers within the uploaded batch. It does not automatically approve or decline any customer.</p></article>
+  </aside>
+</section>
+
+{% if error %}
+<section class="message error-message"><strong>Couldn’t score this file.</strong><span>{{ error }}</span></section>
+{% endif %}
+
+{% if summary %}
+<section class="results-section">
+  <div class="results-heading"><div><span class="eyebrow">SCORING COMPLETE</span><h2>{{ summary.customers }} customers scored</h2><p>Scores are sorted highest to lowest. Within this batch, {{ summary.bands }} risk band{% if summary.bands != 1 %}s{% endif %} were assigned.</p></div><a class="primary-button" href="{{ download_url }}">Download full results <span>↓</span></a></div>
+  <section class="metric-grid result-metrics"><article class="metric-card"><span class="metric-label">Highest score</span><strong>{{ '%.2f'|format(summary.highest_score * 100) }}%</strong><p>Relative risk-ranking score.</p></article><article class="metric-card highlight"><span class="metric-label">Prioritised for review</span><strong>{% if summary.review_count is not none %}{{ summary.review_count }}{% else %}—{% endif %}</strong><p>{% if summary.review_count is not none %}Customers in the top two batch deciles.{% else %}Available for standard decile triage with batches of 10+.{% endif %}</p></article></section>
+  <article class="panel table-panel"><div class="panel-header"><div><span class="eyebrow">PREVIEW</span><h2>Highest-risk customers</h2></div><span class="table-note">Showing first 12 rows</span></div><div class="table-wrap"><table><thead><tr><th>Customer reference</th><th>Model risk score</th><th>Batch risk decile</th><th>Recommended route</th></tr></thead><tbody>{% for row in rows %}<tr><td>{{ row['Customer reference'] }}</td><td><span class="score-pill">{{ '%.2f'|format(row['Model risk score'] * 100) }}%</span></td><td>{{ row['Batch risk decile'] }}</td><td>{{ row['Recommended route'] }}</td></tr>{% endfor %}</tbody></table></div></article>
+</section>
+{% endif %}
+{% endblock %}

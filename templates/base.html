@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Bank GoodCredit{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+  <div class="shell">
+    <aside class="sidebar">
+      <a class="brand" href="{{ url_for('dashboard') }}">
+        <span class="brand-mark">B</span>
+        <span>Bank GoodCredit<small>Risk intelligence</small></span>
+      </a>
+      <nav aria-label="Primary navigation">
+        <a class="nav-link {% if request.endpoint == 'dashboard' %}active{% endif %}" href="{{ url_for('dashboard') }}"><span>▦</span> Portfolio overview</a>
+        <a class="nav-link {% if request.endpoint in ['score', 'download_template'] %}active{% endif %}" href="{{ url_for('score') }}"><span>↗</span> Score a portfolio</a>
+      </nav>
+      <div class="sidebar-note">
+        <span class="eyebrow">MODEL STATUS</span>
+        <strong class="status {{ status|lower }}"><i></i>{{ status }}</strong>
+        <p>{{ status_detail }}</p>
+      </div>
+    </aside>
+    <main class="main-content">
+      <header class="page-header">
+        <div>
+          <p class="eyebrow">CREDIT RISK COMMAND CENTER</p>
+          <h1>{% block heading %}{% endblock %}</h1>
+        </div>
+        <div class="header-note">Model output is a relative risk-ranking score—not a probability of default.</div>
+      </header>
+      {% block content %}{% endblock %}
+      <footer>For decision support only. Credit policy, human oversight, and fairness controls remain required.</footer>
+    </main>
+  </div>
+</body>
+</html>
